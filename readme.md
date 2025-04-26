@@ -7,3 +7,8 @@ Go to your Infra repository on GitHub (the repo where you have this Nightly Buil
 Click on Settings → Secrets and variables → Actions → Secrets.
 
 Click "New repository secret".
+
+
+create ECR repo
+auth-service
+frontend
