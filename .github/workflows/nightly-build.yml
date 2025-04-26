@@ -24,6 +24,7 @@ jobs:
         with:
           repository: devenvaruv/devenops
           ref: main
+          path: devenops-source
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3

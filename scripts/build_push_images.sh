@@ -8,6 +8,6 @@ DATE_TAG=$(date +"%Y%m%d")
 
 for SERVICE in "${SERVICES[@]}"
 do
-  docker build -t "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SERVICE:nightly-$DATE_TAG" ./source-repo/$SERVICE
+  docker build -t "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SERVICE:nightly-$DATE_TAG" ./devenops-source/$SERVICE
   docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SERVICE:nightly-$DATE_TAG"
 done
