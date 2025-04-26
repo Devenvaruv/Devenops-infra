@@ -1,0 +1,39 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: "0 7 * * *"  # Every day at 7 AM UTC
+  workflow_dispatch:  # manual trigger
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      AWS_REGION: us-east-1   # If you want, you can also define constants here
+
+    steps:
+      - name: Checkout Infra Repo
+        uses: actions/checkout@v4
+
+      - name: Checkout Source Repo
+        uses: actions/checkout@v4
+        with:
+          repository: devenvaruv/devenops
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: Build and Push Images
+        run: bash scripts/build_push_images.sh
