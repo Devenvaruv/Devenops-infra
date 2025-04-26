@@ -32,6 +32,19 @@ if [ -z "$EXTERNAL_IP" ]; then
   exit 1
 fi
 
+# Wait for DNS to resolve
+echo "🔎 Waiting for DNS resolution for $EXTERNAL_IP..."
+
+for i in {1..6}; do
+  if nslookup $EXTERNAL_IP >/dev/null 2>&1; then
+    echo "🌐 DNS resolved!"
+    break
+  fi
+  
+  echo "⏳ Waiting for DNS to propagate... ($i/6)"
+  sleep 5
+done
+
 echo "🚀 Curling http://$EXTERNAL_IP/ ..."
 curl -sSf http://$EXTERNAL_IP/ || exit 1
 
