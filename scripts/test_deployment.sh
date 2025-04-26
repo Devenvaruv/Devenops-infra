@@ -42,7 +42,7 @@ for i in {1..6}; do
   fi
   
   echo "⏳ Waiting for DNS to propagate... ($i/6)"
-  sleep 5
+  sleep 10
 done
 
 echo "🚀 Curling http://$EXTERNAL_IP/ ..."
