@@ -34,10 +34,22 @@ jobs:
           aws-session-token: ${{env.AWS_SESSION_TOKEN}}
           aws-region: ${{ env.AWS_REGION }}
 
-
       - name: Login to ECR
         run: |
           aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-      - name: Build and Push Images
-        run: bash scripts/build_push_images.sh
+      # - name: Build and Push Images
+      #   run: bash scripts/build_push_images.sh
+      
+      - name: Install kubectl
+        run: |
+          curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.27.2/2023-06-14/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
+        
+      - name: Creates Namespace
+        run: bash scripts/create_namespace.sh nightly
