@@ -68,5 +68,9 @@ jobs:
       - name: Promote Nightly Images to QA (BatchPutImage)
         run: |
           bash scripts/promote_to_qa_batch.sh
+
+      - name: Cleanup Nightly Namespace
+        run: |
+          bash scripts/clean_up.sh nightly
         
       
