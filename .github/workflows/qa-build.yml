@@ -1,8 +1,6 @@
-name: Nightly Build
+name: QA Build
 
 on:
-  # schedule:
-  #   - cron: "0 7 * * *"  # Every day at 7 AM UTC
   workflow_dispatch:  # manual trigger
 
 jobs:
@@ -37,9 +35,6 @@ jobs:
       - name: Login to ECR
         run: |
           aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-
-      - name: Build and Push Images
-        run: bash scripts/build_push_images.sh
       
       - name: Install kubectl
         run: |
@@ -49,26 +44,27 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
-
+        
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
-        
+
       - name: Creates Namespace
-        run: bash scripts/create_namespace.sh nightly
-      
+        run: |
+          bash scripts/create_namespace.sh qa
+
       - name: Deploy services to EKS
         run: |
-          bash scripts/deploy_services.sh nightly
+          bash scripts/deploy_services.sh qa
 
-      - name: Test Deployment
+      - name: Test Deployment to QA
         run: |
-          bash scripts/test_deployment.sh nightly frontend-service
+          bash scripts/test_deployment.sh qa frontend-service
       
-      - name: Promote Nightly Images to QA (BatchPutImage)
+      - name: Promote QA Images to UAT (BatchPutImage)
         run: |
-          bash scripts/promote_to_qa_batch.sh nightly qa
+          bash scripts/promote_to_qa_batch.sh qa uat
 
       - name: Cleanup Nightly Namespace
         run: |
-          bash scripts/clean_up.sh nightly
+          bash scripts/clean_up.sh qa

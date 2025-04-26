@@ -11,7 +11,7 @@ if [ -z "$NAMESPACE" ]; then
 fi
 
 DATE_TAG=$(date +"%Y%m%d")
-export TAG="nightly-$DATE_TAG"
+export TAG="$NAMESPACE-$DATE_TAG"
 
 # Apply deployments with correct nightly tags
 for yaml in ./k8s/*.yaml
