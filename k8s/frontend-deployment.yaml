@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 179235553979.dkr.ecr.us-east-1.amazonaws.com/devenvaruv/frontend:${TAG}
+          image: 179235553979.dkr.ecr.us-east-1.amazonaws.com/frontend:${TAG}
           ports:
             - containerPort: 80
 ---

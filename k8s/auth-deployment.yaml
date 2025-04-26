@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: 179235553979.dkr.ecr.us-east-1.amazonaws.com/devenvaruv/auth-service:${TAG}
+          image: 179235553979.dkr.ecr.us-east-1.amazonaws.com/auth-service:${TAG}
           ports:
             - containerPort: 5000
 ---
