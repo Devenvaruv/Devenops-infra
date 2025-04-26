@@ -60,4 +60,7 @@ jobs:
       - name: Deploy services to EKS
         run: |
           bash scripts/deploy_services.sh nightly
+      - name: Test Deployment
+        run: |
+          bash scripts/test_deployment.sh nightly frontend-service
       
