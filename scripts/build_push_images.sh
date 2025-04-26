@@ -3,7 +3,7 @@
 
 set -e
 
-SERVICES=("service1" "service2" "service3")
+SERVICES=("frontend" "auth-service" )
 DATE_TAG=$(date +"%Y%m%d")
 
 for SERVICE in "${SERVICES[@]}"
