@@ -38,8 +38,8 @@ jobs:
         run: |
           aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-      # - name: Build and Push Images
-      #   run: bash scripts/build_push_images.sh
+      - name: Build and Push Images
+        run: bash scripts/build_push_images.sh
       
       - name: Install kubectl
         run: |
@@ -72,5 +72,3 @@ jobs:
       - name: Cleanup Nightly Namespace
         run: |
           bash scripts/clean_up.sh nightly
-        
-      
