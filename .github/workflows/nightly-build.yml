@@ -56,3 +56,8 @@ jobs:
         
       - name: Creates Namespace
         run: bash scripts/create_namespace.sh nightly
+      
+      - name: Deploy services to EKS
+        run: |
+          bash scripts/deploy_services.sh nightly
+      
