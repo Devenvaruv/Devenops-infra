@@ -17,13 +17,6 @@ jobs:
       - name: Checkout Infra Repo
         uses: actions/checkout@v4
 
-      - name: Checkout Source Repo
-        uses: actions/checkout@v4
-        with:
-          repository: devenvaruv/devenops
-          ref: main
-          path: devenops-source
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -63,8 +56,8 @@ jobs:
       
       - name: Promote QA Images to UAT (BatchPutImage)
         run: |
-          bash scripts/promote_to_qa_batch.sh qa uat
+          bash scripts/promote_batch.sh qa uat
 
-      - name: Cleanup Nightly Namespace
+      - name: Cleanup qa Namespace
         run: |
           bash scripts/clean_up.sh qa

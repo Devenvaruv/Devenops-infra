@@ -37,38 +37,50 @@ jobs:
       - name: Login to ECR
         run: |
           aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-
-      - name: Build and Push Images
-        run: bash scripts/build_push_images.sh
       
-      - name: Install kubectl
+      - name: Create frontend repo if not exists
         run: |
-          KUBECTL_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
-          echo "Fetched KUBECTL_VERSION=$KUBECTL_VERSION"
-          curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl version --client
+          aws ecr describe-repositories --repository-names "${{ env.FRONTEND_REPO }}" || \
+          aws ecr create-repository --repository-name "${{ env.FRONTEND_REPO }}"
+    
+      - name: Create auth-service repo if not exists
+        run: |
+          aws ecr describe-repositories --repository-names "${{ env.AUTH_SERVICE_REPO }}" || \
+          aws ecr create-repository --repository-name "${{ env.AUTH_SERVICE_REPO }}"
 
-      - name: Update kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
+      # - name: Build and Push Images
+      #   run: |
+      #     bash scripts/build_push_images.sh
+      
+      # - name: Install kubectl
+      #   run: |
+      #     KUBECTL_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
+      #     echo "Fetched KUBECTL_VERSION=$KUBECTL_VERSION"
+      #     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+      #     chmod +x kubectl
+      #     sudo mv kubectl /usr/local/bin/
+      #     kubectl version --client
+
+      # - name: Update kubeconfig for EKS
+      #   run: |
+      #     aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
         
-      - name: Creates Namespace
-        run: bash scripts/create_namespace.sh nightly
+      # - name: Creates Namespace
+      #   run: |
+      #     bash scripts/create_namespace.sh nightly
       
-      - name: Deploy services to EKS
-        run: |
-          bash scripts/deploy_services.sh nightly
+      # - name: Deploy services to EKS
+      #   run: |
+      #     bash scripts/deploy_services.sh nightly
 
-      - name: Test Deployment
-        run: |
-          bash scripts/test_deployment.sh nightly frontend-service
+      # - name: Test Deployment
+      #   run: |
+      #     bash scripts/test_deployment.sh nightly frontend-service
       
-      - name: Promote Nightly Images to QA (BatchPutImage)
-        run: |
-          bash scripts/promote_to_qa_batch.sh nightly qa
+      # - name: Promote Nightly Images to QA (BatchPutImage)
+      #   run: |
+      #     bash scripts/promote_batch.sh nightly qa
 
-      - name: Cleanup Nightly Namespace
-        run: |
-          bash scripts/clean_up.sh nightly
+      # - name: Cleanup Nightly Namespace
+      #   run: |
+      #     bash scripts/clean_up.sh nightly

@@ -1,0 +1,77 @@
+name: Blue/Green Cutover to Production
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+  AWS_REGION: us-east-1
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Infra Repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install kubectl
+        run: |
+            KUBECTL_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
+            echo "Fetched KUBECTL_VERSION=$KUBECTL_VERSION"
+            curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/
+            kubectl version --client
+
+            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+            helm version
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
+
+      - name: Deploy Frontend Green
+        run: |
+          helm upgrade --install frontend-green ./charts/frontend \
+            --values ./charts/frontend/values-green.yaml \
+            --namespace production
+
+      - name: Deploy Auth-Service Green
+        run: |
+          helm upgrade --install auth-service-green ./charts/auth-service \
+            --values ./charts/auth-service/values-green.yaml \
+            --namespace production
+
+      - name: Wait for Frontend Green to Rollout
+        run: |
+          kubectl rollout status deployment/frontend-green -n production
+
+      - name: Wait for Auth-Service Green to Rollout
+        run: |
+          kubectl rollout status deployment/auth-service-green -n production
+
+      - name: Patch Service to switch to Green
+        run: |
+          echo "Switching frontend-service to frontend-green..."
+          kubectl patch service frontend-service -n production -p '{"spec":{"selector":{"app":"frontend-green"}}}'
+          
+          echo "Switching auth-service to auth-service-green..."
+          kubectl patch service auth-service -n production -p '{"spec":{"selector":{"app":"auth-service-green"}}}'
+
+      - name: Confirm Services after switch
+        run: |
+          kubectl get svc frontend-service -n production -o yaml
+          kubectl get svc auth-service -n production -o yaml
+

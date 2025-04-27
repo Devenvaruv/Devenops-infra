@@ -1,0 +1,15 @@
+deploymentName: auth-service
+replicaCount: 1
+
+image:
+  repository: 179235553979.dkr.ecr.us-east-1.amazonaws.com/auth-service
+  tag: latest
+  pullPolicy: Always
+
+service:
+  name: auth-service
+  type: ClusterIP
+  port: 5000
+
+labels:
+  app: auth-service
