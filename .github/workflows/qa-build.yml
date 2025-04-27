@@ -54,9 +54,9 @@ jobs:
         run: |
           bash scripts/test_deployment.sh qa frontend-service
       
-      - name: Promote QA Images to UAT (BatchPutImage)
+      - name: Promote QA Images to Latest (BatchPutImage)
         run: |
-          bash scripts/promote_batch.sh qa uat
+          bash scripts/promote_batch.sh qa latest
 
       - name: Cleanup qa Namespace
         run: |
