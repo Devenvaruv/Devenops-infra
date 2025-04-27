@@ -40,13 +40,13 @@ jobs:
       
       - name: Create frontend repo if not exists
         run: |
-          aws ecr describe-repositories --repository-names "${{ env.FRONTEND_REPO }}" || \
-          aws ecr create-repository --repository-name "${{ env.FRONTEND_REPO }}"
+          aws ecr describe-repositories --repository-names "frontend" || \
+          aws ecr create-repository --repository-name "frontend"
     
       - name: Create auth-service repo if not exists
         run: |
-          aws ecr describe-repositories --repository-names "${{ env.AUTH_SERVICE_REPO }}" || \
-          aws ecr create-repository --repository-name "${{ env.AUTH_SERVICE_REPO }}"
+          aws ecr describe-repositories --repository-names "auth-service" || \
+          aws ecr create-repository --repository-name "auth-service"
 
       # - name: Build and Push Images
       #   run: |
