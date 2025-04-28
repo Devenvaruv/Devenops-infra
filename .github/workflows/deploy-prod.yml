@@ -46,11 +46,11 @@ jobs:
         
       - name: Creates Namespace
         run: |
-          bash scripts/create_namespace.sh V1.0.0
+          bash scripts/create_namespace.sh v1.0.0
       
       - name: Deploy services to EKS
         run: |
-          bash scripts/deploy_services.sh V1.0.0
+          bash scripts/deploy_services.sh v1.0.0
 
       - name: Test Deployment
         run: |
