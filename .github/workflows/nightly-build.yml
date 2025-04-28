@@ -77,9 +77,9 @@ jobs:
       #   run: |
       #     bash scripts/test_deployment.sh nightly frontend-service
       
-      # - name: Promote Nightly Images to QA (BatchPutImage)
-      #   run: |
-      #     bash scripts/promote_batch.sh nightly qa
+      - name: Promote Nightly Images to QA (BatchPutImage)
+        run: |
+          bash scripts/promote_batch.sh nightly V1.0.0
 
       # - name: Cleanup Nightly Namespace
       #   run: |
