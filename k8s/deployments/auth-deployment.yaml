@@ -17,15 +17,3 @@ spec:
           image: 179235553979.dkr.ecr.us-east-1.amazonaws.com/auth-service:${TAG}
           ports:
             - containerPort: 5000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: auth-service
-spec:
-  selector:
-    app: auth-service
-  ports:
-    - port: 5000
-      targetPort: 5000
-  type: ClusterIP

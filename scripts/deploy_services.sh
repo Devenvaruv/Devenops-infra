@@ -14,7 +14,7 @@ DATE_TAG=$(date +"%Y%m%d")
 export TAG="$NAMESPACE-$DATE_TAG"
 
 # Apply deployments with correct nightly tags
-for yaml in ./k8s/*.yaml
+for yaml in ./k8s/deployments/*.yaml ./k8s/services/*.yaml
 do
   echo "🚀 Applying $yaml into namespace $NAMESPACE with tag $TAG ..."
   envsubst < "$yaml" | kubectl apply -n "$NAMESPACE" -f -
