@@ -28,7 +28,7 @@ for i in {1..6}; do
 done
 
 if [ -z "$EXTERNAL_IP" ]; then
-  echo "❌ Failed to get External IP after 30 seconds."
+  echo "❌ Failed to get External IP after 60 seconds."
   exit 1
 fi
 

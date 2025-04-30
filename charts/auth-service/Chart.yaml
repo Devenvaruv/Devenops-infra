@@ -1,6 +1,5 @@
 apiVersion: v2
 name: auth-service
-description: Auth service Helm chart
-type: application
 version: 0.1.0
-appVersion: "1.0"
+description: Auth micro-service with blue-green slots
+type: application

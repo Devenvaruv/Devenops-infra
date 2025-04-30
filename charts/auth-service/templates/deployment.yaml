@@ -1,26 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.deploymentName }}
+  name: auth-service-{{ .Values.slot }}
   labels:
-    app: {{ .Values.labels.app }}
+    app: auth-service
+    slot: {{ .Values.slot }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.labels.app }}
+      app: auth-service
+      slot: {{ .Values.slot }}
   template:
     metadata:
       labels:
-        app: {{ .Values.labels.app }}
+        app: auth-service
+        slot: {{ .Values.slot }}
     spec:
       containers:
-      - name: {{ .Values.labels.app }}
+      - name: auth-service
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.service.port }}
-        lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh", "-c", "sleep 60"]
+        - containerPort: 5000
