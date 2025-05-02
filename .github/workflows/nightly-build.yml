@@ -52,26 +52,26 @@ jobs:
         run: |
           bash scripts/build_push_images.sh
       
-      - name: Install kubectl
-        run: |
-          KUBECTL_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
-          echo "Fetched KUBECTL_VERSION=$KUBECTL_VERSION"
-          curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl version --client
+      # - name: Install kubectl
+      #   run: |
+      #     KUBECTL_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
+      #     echo "Fetched KUBECTL_VERSION=$KUBECTL_VERSION"
+      #     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+      #     chmod +x kubectl
+      #     sudo mv kubectl /usr/local/bin/
+      #     kubectl version --client
 
-      - name: Update kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
+      # - name: Update kubeconfig for EKS
+      #   run: |
+      #     aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
         
-      - name: Creates Namespace
-        run: |
-          bash scripts/create_namespace.sh nightly
+      # - name: Creates Namespace
+      #   run: |
+      #     bash scripts/create_namespace.sh nightly
       
-      - name: Deploy services to EKS
-        run: |
-          bash scripts/deploy_services.sh nightly
+      # - name: Deploy services to EKS
+      #   run: |
+      #     bash scripts/deploy_services.sh nightly
 
       # - name: Test Deployment
       #   run: |
