@@ -54,7 +54,7 @@ jobs:
         run: |
           bash scripts/test_deployment.sh qa frontend-service
       
-      - name: Promote QA Images to Latest (BatchPutImage)
+      - name: Promote QA Images to Latest
         run: |
           bash scripts/promote_batch.sh qa latest
 

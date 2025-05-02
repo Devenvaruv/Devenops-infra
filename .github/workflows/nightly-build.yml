@@ -77,10 +77,10 @@ jobs:
         run: |
           bash scripts/test_deployment.sh nightly frontend-service
       
-      - name: Promote Nightly Images to QA (BatchPutImage)
+      - name: Promote Nightly Images to QA-skiping everything and doing only latest now
         run: |
-          bash scripts/promote_batch.sh nightly qa
+          bash scripts/promote_batch.sh nightly latest
 
-      # - name: Cleanup Nightly Namespace
-      #   run: |
-      #     bash scripts/clean_up.sh nightly
+      - name: Cleanup Nightly Namespace
+        run: |
+          bash scripts/clean_up.sh nightly
