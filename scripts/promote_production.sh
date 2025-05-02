@@ -2,52 +2,56 @@
 
 set -e
 
-OLD_TAG=$1 
-DATE_TAG=$(date +"%Y%m%d")
-SOURCE_TAG="$OLD_TAG-$DATE_TAG"
-REPOSITORIES=("frontend" "auth-service")
+ACCOUNT_ID=$1   # Passed in from GitHub Actions
 REGION="us-east-1"
-ACCOUNT_ID=$2
-
-echo "🚀 Promoting $SOURCE_TAG images to versioned tags..."
+REPOSITORIES=("frontend" "auth-service")
 
 for REPO in "${REPOSITORIES[@]}"; do
-  echo "🔍 Checking tags for $REPO..."
+  echo "📦 Processing $REPO..."
 
-  # Get all vN tags
-  TAGS=$(aws ecr list-images \
+  # Step 1: Get all image tags
+  ALL_TAGS=$(aws ecr list-images \
     --repository-name "$REPO" \
-    --filter "tagStatus=TAGGED" \
+    --filter tagStatus=TAGGED \
     --query 'imageIds[*].tag' \
-    --output text)
+    --output text | tr '\t' '\n')
 
-  # Extract highest version number
-  HIGHEST_VERSION=$(echo "$TAGS" | tr '\t' '\n' | grep -E '^v[0-9]+$' | sed 's/v//' | sort -n | tail -n1)
-  NEXT_VERSION=${HIGHEST_VERSION:-0}
-  NEXT_VERSION=$((NEXT_VERSION + 1))
+  # Step 2: Extract vN tags
+  VERSION_TAGS=$(echo "$ALL_TAGS" | grep -E '^v[0-9]+$')
+  HIGHEST_VERSION=$(echo "$VERSION_TAGS" | sed 's/v//' | sort -n | tail -n1)
+
+  NEXT_VERSION=$((HIGHEST_VERSION + 1))
   VERSION_TAG="v$NEXT_VERSION"
 
-  echo "📦 Fetching manifest for $REPO:$SOURCE_TAG..."
+  echo "🔍 Existing highest version: v$HIGHEST_VERSION → New tag: $VERSION_TAG"
+
+  # Step 3: Find a tag that is NOT already versioned
+  SOURCE_TAG=$(echo "$ALL_TAGS" | grep -vE '^v[0-9]+$' | head -n1)
+
+  if [[ -z "$SOURCE_TAG" ]]; then
+    echo "❌ No unversioned image found for $REPO. Skipping."
+    continue
+  fi
+
+  echo "♻️ Promoting $SOURCE_TAG → $VERSION_TAG"
 
   MANIFEST=$(aws ecr batch-get-image \
-    --repository-name $REPO \
+    --repository-name "$REPO" \
     --image-ids imageTag=$SOURCE_TAG \
     --query 'images[0].imageManifest' \
     --output text)
 
   if [ -z "$MANIFEST" ] || [ "$MANIFEST" == "None" ]; then
-    echo "❌ No manifest found for $REPO:$SOURCE_TAG"
-    exit 1
+    echo "❌ Manifest not found for $SOURCE_TAG — skipping."
+    continue
   fi
-
-  echo "🏷️ Tagging $REPO:$SOURCE_TAG as $VERSION_TAG..."
 
   aws ecr put-image \
     --repository-name "$REPO" \
     --image-tag "$VERSION_TAG" \
     --image-manifest "$MANIFEST"
 
-  echo "✅ Promoted $REPO:$SOURCE_TAG to $VERSION_TAG"
+  echo "✅ Tagged $REPO:$SOURCE_TAG as $VERSION_TAG"
 done
 
-echo "🎯 All services promoted successfully!"
+echo "🎉 All services promoted to the next version tag!"
