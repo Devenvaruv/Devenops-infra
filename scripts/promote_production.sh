@@ -1,9 +1,10 @@
 #!/bin/bash
 
 set -e
-
-ACCOUNT_ID=$1        
-SOURCE_TAG=$2        
+DATE_TAG=$(date +"%Y%m%d")
+ACCOUNT_ID=$1
+OLD_TAG=$2        
+SOURCE_TAG="$NEW_TAG-$DATE_TAG"      
 REGION="us-east-1"
 REPOSITORIES=("frontend" "auth-service")
 
