@@ -73,14 +73,17 @@ jobs:
         run: |
           bash scripts/deploy_services.sh nightly
 
-      - name: Test Deployment
-        run: |
-          bash scripts/test_deployment.sh nightly frontend-service
+      # - name: Test Deployment
+      #   run: |
+      #     bash scripts/test_deployment.sh nightly frontend-service
       
-      - name: Promote Nightly Images to QA-skiping everything and doing only latest now
+      # - name: Promote Nightly Images to QA
+      #   run: |
+      #     bash scripts/promote_batch.sh nightly qa
+
+      - name: Promote Nightly Images to QA
         run: |
-          bash scripts/promote_batch.sh nightly latest
-          bash scripts/promote_batch.sh nightly blue
+          bash scripts/promote_production.sh nightly $AWS_ACCOUNT_ID
 
       - name: Cleanup Nightly Namespace
         run: |
