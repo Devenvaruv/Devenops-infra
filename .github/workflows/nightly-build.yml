@@ -85,6 +85,6 @@ jobs:
         run: |
           bash scripts/promote_production.sh $AWS_ACCOUNT_ID
 
-      - name: Cleanup Nightly Namespace
-        run: |
-          bash scripts/clean_up.sh nightly
+      # - name: Cleanup Nightly Namespace
+      #   run: |
+      #     bash scripts/clean_up.sh nightly
