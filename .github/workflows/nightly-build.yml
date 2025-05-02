@@ -80,6 +80,7 @@ jobs:
       - name: Promote Nightly Images to QA-skiping everything and doing only latest now
         run: |
           bash scripts/promote_batch.sh nightly latest
+          bash scripts/promote_batch.sh nightly blue
 
       - name: Cleanup Nightly Namespace
         run: |

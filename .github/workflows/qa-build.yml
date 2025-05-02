@@ -56,7 +56,7 @@ jobs:
       
       - name: Promote QA Images to Latest
         run: |
-          bash scripts/promote_batch.sh qa latest
+          bash scripts/promote_batch.sh qa blue
 
       - name: Cleanup qa Namespace
         run: |
