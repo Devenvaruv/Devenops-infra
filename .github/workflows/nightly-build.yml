@@ -83,7 +83,7 @@ jobs:
 
       - name: Promote Nightly Images to production
         run: |
-          bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightly-20250502
+          bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightly
 
       # - name: Cleanup Nightly Namespace
       #   run: |
