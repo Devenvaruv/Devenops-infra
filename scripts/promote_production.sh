@@ -1,36 +1,36 @@
 #!/bin/bash
 
 set -e
-DATE_TAG=$(date +"%Y%m%d")
-ACCOUNT_ID=$1         
-SOURCE_TAG=$2-$DATE_TAG        
+
+ACCOUNT_ID=$1        
+SOURCE_TAG=$2        
 REGION="us-east-1"
 REPOSITORIES=("frontend" "auth-service")
 
 for REPO in "${REPOSITORIES[@]}"; do
   echo "📦 Processing $REPO..."
 
-  # Step 1: List all tags
+  echo "📄 Fetching existing image tags..."
   ALL_TAGS=$(aws ecr list-images \
     --repository-name "$REPO" \
     --filter tagStatus=TAGGED \
     --query 'imageIds[*].tag' \
     --output text | tr '\t' '\n')
 
-  if [[ -z "$ALL_TAGS" ]]; then
-    echo "⚠️ No images found for $REPO. Skipping."
-    continue
-  fi
-
-  # Step 2: Find highest vN
+  echo "🔍 Searching for existing versioned tags (vN)..."
   VERSION_TAGS=$(echo "$ALL_TAGS" | grep -E '^v[0-9]+$' || true)
   HIGHEST_VERSION=$(echo "$VERSION_TAGS" | sed 's/v//' | sort -n | tail -n1)
-  NEXT_VERSION=$((HIGHEST_VERSION + 1))
+
+  if [[ -z "$HIGHEST_VERSION" ]]; then
+    NEXT_VERSION=1
+  else
+    NEXT_VERSION=$((HIGHEST_VERSION + 1))
+  fi
+
   VERSION_TAG="v$NEXT_VERSION"
+  echo "🔢 Will promote $SOURCE_TAG → $VERSION_TAG"
 
-  echo "🔢 Promoting tag: $SOURCE_TAG → $VERSION_TAG"
-
-  # Step 3: Get manifest of source tag
+  echo "🧾 Fetching manifest for $SOURCE_TAG..."
   MANIFEST=$(aws ecr batch-get-image \
     --repository-name "$REPO" \
     --image-ids imageTag="$SOURCE_TAG" \
@@ -38,17 +38,17 @@ for REPO in "${REPOSITORIES[@]}"; do
     --output text)
 
   if [ -z "$MANIFEST" ] || [ "$MANIFEST" == "None" ]; then
-    echo "❌ Manifest not found for $REPO:$SOURCE_TAG. Skipping."
-    continue
+    echo "❌ ERROR: Manifest not found for $REPO:$SOURCE_TAG"
+    exit 1
   fi
 
-  # Step 4: Create versioned tag
+  echo "🏷️ Tagging $REPO:$SOURCE_TAG as $VERSION_TAG"
   aws ecr put-image \
     --repository-name "$REPO" \
     --image-tag "$VERSION_TAG" \
     --image-manifest "$MANIFEST"
 
-  echo "✅ $REPO:$SOURCE_TAG promoted to $VERSION_TAG"
+  echo "✅ Promoted $REPO:$SOURCE_TAG → $VERSION_TAG"
 done
 
-echo "🎉 Promotion complete!"
+echo "🎯 All images promoted!"
