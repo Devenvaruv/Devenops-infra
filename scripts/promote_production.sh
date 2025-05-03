@@ -17,6 +17,10 @@ for REPO in "${REPOSITORIES[@]}"; do
     --filter tagStatus=TAGGED \
     --query 'imageIds[*].tag' \
     --output json | jq -r '.[]' | sort)
+  
+  echo "📌 All tags in $REPO:"
+  echo "$ALL_TAGS"
+
 
   echo "🔍 Searching for existing versioned tags (vN)..."
   VERSION_TAGS=$(echo "$ALL_TAGS" | grep -E '^v[0-9]+$' || true)
