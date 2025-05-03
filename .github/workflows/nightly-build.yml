@@ -25,6 +25,11 @@ jobs:
           repository: devenvaruv/devenops
           ref: main
           path: devenops-source
+      
+      - name: Fetch Git history for change detection
+        run: |
+          cd devenops-source
+          git fetch origin main --depth=2
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
