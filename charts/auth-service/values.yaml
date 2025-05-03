@@ -1,6 +1,0 @@
-slot: blue          # DO NOT edit manually; CI overrides
-replicaCount: 1
-
-image:
-  repository: 179235553979.dkr.ecr.us-east-1.amazonaws.com/auth-service
-  tag: latest       # CI overrides with an immutable tag
