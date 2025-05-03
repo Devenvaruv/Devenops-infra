@@ -28,11 +28,11 @@ get_latest_tag() {
 # Apply deployments and services with correct tag per service
 for yaml in ./k8s/deployments/*.yaml ./k8s/services/*.yaml
 do
-  # Guess the repo name from the file name (e.g., auth-service-deployment.yaml → auth-service)
+  # Guess the repo name from the file name (e.g., auth-deployment.yaml → auth)
   if [[ $yaml == *frontend* ]]; then
     REPO="frontend"
-  elif [[ $yaml == *auth-service* ]]; then
-    REPO="auth-service"
+  elif [[ $yaml == *auth* ]]; then
+    REPO="auth"
   else
     echo "⚠️ Skipping unknown file: $yaml"
     continue

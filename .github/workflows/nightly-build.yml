@@ -48,10 +48,10 @@ jobs:
           aws ecr describe-repositories --repository-names "frontend" || \
           aws ecr create-repository --repository-name "frontend"
     
-      - name: Create auth-service repo if not exists
+      - name: Create auth repo if not exists
         run: |
-          aws ecr describe-repositories --repository-names "auth-service" || \
-          aws ecr create-repository --repository-name "auth-service"
+          aws ecr describe-repositories --repository-names "auth" || \
+          aws ecr create-repository --repository-name "auth"
 
       - name: Build and Push Images
         run: |

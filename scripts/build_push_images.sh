@@ -2,7 +2,7 @@
 # scripts/build_push_images.sh
 set -e
 
-SERVICES=("frontend" "auth-service")
+SERVICES=("frontend" "auth")
 DATE_TAG=20250504
 # DATE_TAG=$(date +"%Y%m%d")
 
