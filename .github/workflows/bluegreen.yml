@@ -2,10 +2,10 @@ name: Blue-Green Deploy to Prod
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["QA Build"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["QA Build"]
+  #   types:
+  #     - completed
 
 jobs:
   blue-green-deploy:
@@ -48,9 +48,9 @@ jobs:
         run: |
           bash scripts/create_namespace.sh green
 
-      - name: Deploy all services to green (auto latest)
+      - name: Deploy all services to green
         run: |
-          bash scripts/deploy_services.sh green
+          bash scripts/deploy_services_prod.sh green
 
       - name: Wait 60 seconds before testing
         run: sleep 60
@@ -59,9 +59,9 @@ jobs:
         run: |
           bash scripts/test_deployment.sh green frontend-service
 
-      - name: Promote green to prod (same tag reused)
+      - name: Promote green to blue (same tag reused)
         run: |
-          bash scripts/deploy_services.sh blue
+          bash scripts/deploy_services_prod.sh blue
 
       - name: Cleanup green namespace
         run: |
