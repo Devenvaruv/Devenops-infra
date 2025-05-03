@@ -2,6 +2,10 @@ name: Blue-Green Deploy to Prod
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["QA Build"]
+    types:
+      - completed
 
 jobs:
   blue-green-deploy:

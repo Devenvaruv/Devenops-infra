@@ -2,6 +2,10 @@ name: QA Build
 
 on:
   workflow_dispatch:  # manual trigger
+  workflow_run:
+    workflows: ["Nighlty Build"]
+    types:
+      - completed
 
 jobs:
   build-and-deploy:
@@ -54,9 +58,13 @@ jobs:
         run: |
           bash scripts/test_deployment.sh qa frontend-service
       
-      - name: Promote QA Images to Latest
+      # - name: Promote QA Images to Latest
+      #   run: |
+      #     bash scripts/promote_batch.sh qa blue
+      
+      - name: Promote Nightly Images to production
         run: |
-          bash scripts/promote_batch.sh qa blue
+          bash scripts/promote_production.sh $AWS_ACCOUNT_ID qa
 
       - name: Cleanup qa Namespace
         run: |
