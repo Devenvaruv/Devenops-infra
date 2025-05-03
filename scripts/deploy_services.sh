@@ -10,14 +10,47 @@ if [ -z "$NAMESPACE" ]; then
   exit 1
 fi
 
-DATE_TAG=$(date +"%Y%m%d")
-export TAG="$NAMESPACE-$DATE_TAG"
+# Function to get the latest vN tag from a given repo
+get_latest_tag() {
+  local repo=$1
+  aws ecr describe-images \
+    --repository-name "$repo" \
+    --query 'imageDetails[*].imageTags' \
+    --output json |
+    jq -r '.[]? | .[]?' |
+    grep -E '^v[0-9]+$' |
+    sed 's/v//' |
+    sort -n |
+    tail -n1
+}
 
-# Apply deployments with correct nightly tags
+# Apply deployments and services with correct tag per service
 for yaml in ./k8s/deployments/*.yaml ./k8s/services/*.yaml
 do
-  echo "🚀 Applying $yaml into namespace $NAMESPACE with tag $TAG ..."
+  # Guess the repo name from the file name (e.g., auth-service-deployment.yaml → auth-service)
+  if [[ $yaml == *frontend* ]]; then
+    REPO="frontend"
+  elif [[ $yaml == *auth-service* ]]; then
+    REPO="auth-service"
+  else
+    echo "⚠️ Skipping unknown file: $yaml"
+    continue
+  fi
+
+  echo "🔍 Getting latest version tag for $REPO..."
+  LATEST_NUM=$(get_latest_tag "$REPO")
+
+  if [ -z "$LATEST_NUM" ]; then
+    echo "❌ No version tags found for $REPO. Skipping $yaml"
+    continue
+  fi
+
+  TAG="v$LATEST_NUM"
+  echo "📦 Using tag $TAG for $REPO ($yaml)"
+
+  export TAG  # For envsubst
   envsubst < "$yaml" | kubectl apply -n "$NAMESPACE" -f -
+
 done
 
-echo "✅ Deployment complete!"
+echo "✅ All deployments applied with correct version tags!"
