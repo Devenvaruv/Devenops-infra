@@ -23,9 +23,9 @@ do
     --query 'images[0].imageManifest' \
     --output text)
 
-  if [ -z "$MANIFEST" ]; then
-    echo "❌ No manifest found for $SERVICE:$DEMOTE_TAG"
-    exit 1
+  if [ -z "$MANIFEST" ] || [ "$MANIFEST" == "None" ]; then
+  echo "⏭️ Skipping $SERVICE — no image found for $DEMOTE_TAG"
+  continue
   fi
 
   echo "📤 Creating QA tag for $SERVICE:$PROMOTE_TAG..."
