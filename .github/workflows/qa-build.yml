@@ -3,7 +3,7 @@ name: QA Build
 on:
   workflow_dispatch:  # manual trigger
   workflow_run:
-    workflows: ["Nighlty Build"]
+    workflows: ["Nightly Build"]
     types:
       - completed
 
