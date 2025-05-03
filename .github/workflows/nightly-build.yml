@@ -48,9 +48,9 @@ jobs:
           aws ecr describe-repositories --repository-names "auth-service" || \
           aws ecr create-repository --repository-name "auth-service"
 
-      # - name: Build and Push Images
-      #   run: |
-      #     bash scripts/build_push_images.sh
+      - name: Build and Push Images
+        run: |
+          bash scripts/build_push_images.sh
       
       # - name: Install kubectl
       #   run: |
@@ -83,7 +83,7 @@ jobs:
 
       - name: Promote Nightly Images to production
         run: |
-          bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightly
+          bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightlyw
 
       # - name: Cleanup Nightly Namespace
       #   run: |
