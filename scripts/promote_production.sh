@@ -14,9 +14,8 @@ for REPO in "${REPOSITORIES[@]}"; do
   echo "📄 Fetching existing image tags..."
   ALL_TAGS=$(aws ecr list-images \
     --repository-name "$REPO" \
-    --filter tagStatus=TAGGED \
-    --query 'imageIds[*].tag' \
-    --output json | jq -r '.[]' | sort)
+    --query 'imageDetails[*].imageTags' \
+    --output json | jq -r '.[] | .[]' | sort)
   
   echo "📌 All tags in $REPO:"
   echo "$ALL_TAGS"
