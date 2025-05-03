@@ -50,3 +50,8 @@ jobs:
 
       - name: Test green deployment
         run: bash scripts/test_deployment.sh green frontend-service
+
+      - name: Update DNS record to point green.devenops.shop to green LB
+        run: |
+          export HOSTED_ZONE_ID=${{ secrets.HOSTED_ZONE_ID }}
+          bash scripts/update_dns.sh green.devenops.shop green frontend-service
