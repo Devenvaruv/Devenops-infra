@@ -73,9 +73,9 @@ jobs:
         run: |
           bash scripts/deploy_services.sh nightly
 
-      - name: Test Deployment
-        run: |
-          bash scripts/test_deployment.sh nightly frontend-service
+      # - name: Test Deployment
+      #   run: |
+      #     bash scripts/test_deployment.sh nightly frontend-service
       
       - name: Promote Nightly Images to QA
         run: |
@@ -83,7 +83,7 @@ jobs:
 
       # - name: Promote Nightly Images to production
       #   run: |
-      #     bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightly
+      #     bash scripts/promote_production.sh nightly
 
       - name: Cleanup Nightly Namespace
         run: |

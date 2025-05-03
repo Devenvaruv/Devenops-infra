@@ -2,8 +2,7 @@
 
 set -e
 DATE_TAG=$(date +"%Y%m%d")
-ACCOUNT_ID=$1
-OLD_TAG=$2        
+OLD_TAG=$1        
 SOURCE_TAG="$OLD_TAG-$DATE_TAG"      
 REGION="us-east-1"
 REPOSITORIES=("frontend" "auth-service")

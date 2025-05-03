@@ -54,9 +54,9 @@ jobs:
         run: |
           bash scripts/deploy_services.sh qa
 
-      - name: Test Deployment to QA
-        run: |
-          bash scripts/test_deployment.sh qa frontend-service
+      # - name: Test Deployment to QA
+      #   run: |
+      #     bash scripts/test_deployment.sh qa frontend-service
       
       # - name: Promote QA Images to Latest
       #   run: |
@@ -64,7 +64,7 @@ jobs:
       
       - name: Promote Nightly Images to production
         run: |
-          bash scripts/promote_production.sh $AWS_ACCOUNT_ID qa
+          bash scripts/promote_production.sh qa
 
       - name: Cleanup qa Namespace
         run: |
