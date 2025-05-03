@@ -3,8 +3,8 @@
 set -e
 OLD_TAG=$1
 NEW_TAG=$2
-DATE_TAG=20250504
-# DATE_TAG=$(date +"%Y%m%d")
+#DATE_TAG=20250504
+DATE_TAG=$(date +"%Y%m%d")
 
 SERVICES=("frontend" "auth")
 

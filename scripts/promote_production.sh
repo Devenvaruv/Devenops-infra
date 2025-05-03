@@ -1,8 +1,8 @@
 #!/bin/bash
 
 set -e
-# DATE_TAG=$(date +"%Y%m%d")
-DATE_TAG=20250504
+DATE_TAG=$(date +"%Y%m%d")
+# DATE_TAG=20250504
 OLD_TAG=$1        
 SOURCE_TAG="$OLD_TAG-$DATE_TAG"      
 REGION="us-east-1"

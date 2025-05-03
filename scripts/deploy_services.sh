@@ -10,8 +10,8 @@ if [ -z "$NAMESPACE" ]; then
   exit 1
 fi
 
-# DATE_TAG=$(date +"%Y%m%d")
-DATE_TAG=20250504
+DATE_TAG=$(date +"%Y%m%d")
+# DATE_TAG=20250504
 export TAG="$NAMESPACE-$DATE_TAG"
 
 # Apply deployments with correct nightly tags

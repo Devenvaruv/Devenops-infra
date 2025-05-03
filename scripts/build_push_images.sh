@@ -3,8 +3,8 @@
 set -e
 
 SERVICES=("frontend" "auth")
-DATE_TAG=20250504
-# DATE_TAG=$(date +"%Y%m%d")
+# DATE_TAG=20250504
+DATE_TAG=$(date +"%Y%m%d")
 
 # Gets list of changed directories in devenops-source/
 CHANGED_SERVICES=$(git -C devenops-source diff --name-only HEAD~1 HEAD | awk -F/ '{print $1}' | sort -u)
