@@ -50,7 +50,7 @@ jobs:
       
       - name: Deploy services to EKS
         run: |
-          bash scripts/deploy_services.sh blue
+          bash scripts/deploy_services_prod.sh blue
 
       - name: Test Deployment
         run: |
