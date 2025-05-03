@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-DATE_TAG=$(date +"%Y%m%d")
+DATE_TAG=$(date +"%Y%m%d-%H%M%S")
 ACCOUNT_ID=$1
 OLD_TAG=$2        
 SOURCE_TAG="$OLD_TAG-$DATE_TAG"      
