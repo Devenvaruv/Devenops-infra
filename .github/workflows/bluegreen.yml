@@ -1,23 +1,10 @@
-name: Blue-Green Rollout  (single micro-service)
+name: Blue-Green Deploy to Prod
 
 on:
   workflow_dispatch:
-    inputs:
-      service_name:
-        description: "K8s Service / Deployment base name (e.g. auth-service)"
-        required: true
-        default: auth-service
-      docker_context:
-        description: "Docker build context path"
-        required: true
-        default: ./auth-service
-      registry_repo:
-        description: "ECR repo URI without tag"
-        required: true
-        default: 179235553979.dkr.ecr.us-east-1.amazonaws.com/auth-service
 
 jobs:
-  bluegreen:
+  blue-green-deploy:
     runs-on: ubuntu-latest
     env:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -25,93 +12,53 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       AWS_REGION: us-east-1
-      K8S_NAMESPACE: blue        # using the same prod namespace
 
     steps:
-    # ───────── CI prerequisites ─────────
-    - name: 🛎️ Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout Infra Repo
+        uses: actions/checkout@v4
 
-    - name: 🔑 Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id:     ${{ env.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token:     ${{ env.AWS_SESSION_TOKEN }}
-        aws-region:            ${{ env.AWS_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: 📥 ECR login
-      run: |
-        aws ecr get-login-password |
-          docker login --username AWS --password-stdin \
-          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-    - name: 🐳 Build & push image
-      id: build
-      run: |
-        TAG=prod-$(date +%Y%m%d%H%M%S)
-        CONTEXT="${{ inputs.docker_context }}"
-        REPO="${{ inputs.registry_repo }}"
-        docker build -t "$REPO:$TAG" "$CONTEXT"
-        docker push "$REPO:$TAG"
-        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - name: Install kubectl
+        run: |
+          curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
 
-    - name: ⎈ Install kubectl
-      run: |
-        curl -sLO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-        chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-        kubectl version --client=true --output=yaml
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
 
-    # kubeconfig is already created by the prod workflow on this runner image
-    - name: ⎈ Update kubeconfig for EKS
-      run: |
-        aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
+      - name: Create green namespace
+        run: |
+          bash scripts/create_namespace.sh green
 
-    # ───────── Determine live / idle slot ─────────
-    - name: 🔍 Pick idle slot
-      id: slot
-      run: |
-        SVC="${{ inputs.service_name }}"
-        LIVE=$(kubectl get svc "$SVC" \
-               -n $K8S_NAMESPACE \
-               -o=jsonpath='{.spec.selector.slot}')
-        echo "Live slot: $LIVE"
-        if [[ "$LIVE" == "green" ]]; then IDLE=blue; else IDLE=green; fi
-        echo "idle_slot=$IDLE" >> "$GITHUB_OUTPUT"
+      - name: Deploy all services to green (auto latest)
+        run: |
+          bash scripts/deploy_services.sh green
 
-    # ───────── Deploy green (or blue) slot ─────────
-    - name: 🚀 Deploy idle slot
-      env:
-        SLOT: ${{ steps.slot.outputs.idle_slot }}
-        TAG:  ${{ steps.build.outputs.tag }}
-      run: |
-        echo "Deploying slot=$SLOT tag=$TAG"
-        ./scripts/deploy_single_service.sh "$SLOT" "${{ inputs.service_name }}" "$TAG"
+      - name: Wait 60 seconds before testing
+        run: sleep 60
 
-    - name: ✅ Wait for rollout
-      env:
-        SLOT: ${{ steps.slot.outputs.idle_slot }}
-      run: |
-        kubectl rollout status deployment/${{ inputs.service_name }}-$SLOT \
-          -n $K8S_NAMESPACE --timeout=300s
+      - name: Test green deployment
+        run: |
+          bash scripts/test_deployment.sh green frontend-service
 
-    - name: ⏱️ Extra 60 s soak
-      run: sleep 60
+      - name: Promote green to prod (same tag reused)
+        run: |
+          bash scripts/deploy_services.sh blue
 
-    # ───────── Flip Service selector ─────────
-    - name: 🔄 Shift traffic to idle slot
-      env:
-        SLOT: ${{ steps.slot.outputs.idle_slot }}
-      run: |
-        kubectl patch svc ${{ inputs.service_name }} -n $K8S_NAMESPACE \
-          -p "{\"spec\":{\"selector\":{\"app\":\"${{ inputs.service_name }}\",\"slot\":\"${SLOT}\"}}}"
-
-    # ───────── Remove old slot ─────────
-    - name: 🧹 Delete old Deployment
-      if: always()
-      env:
-        SLOT: ${{ steps.slot.outputs.idle_slot }}
-      run: |
-        OLD=$([[ "$SLOT" == "green" ]] && echo blue || echo green)
-        kubectl delete deployment "${{ inputs.service_name }}-$OLD" \
-          -n $K8S_NAMESPACE || true
+      - name: Cleanup green namespace
+        run: |
+          kubectl delete namespace green

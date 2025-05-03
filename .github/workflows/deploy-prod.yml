@@ -54,5 +54,5 @@ jobs:
 
       - name: Test Deployment
         run: |
-          bash scripts/test_deployment.sh prod frontend-service
+          bash scripts/test_deployment.sh blue frontend-service
 

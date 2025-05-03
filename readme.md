@@ -8,11 +8,9 @@ Click on Settings → Secrets and variables → Actions → Secrets.
 
 Click "New repository secret".
 
-
 create ECR repo
 auth-service
 frontend
-
 
 the code is flexible enought to run any env as long as we have valid images
 

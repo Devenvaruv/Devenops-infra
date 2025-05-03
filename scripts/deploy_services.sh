@@ -4,6 +4,7 @@
 set -e
 
 NAMESPACE=$1
+CUSTOM_TAG=$2
 
 if [ -z "$NAMESPACE" ]; then
   echo "❌ Namespace not provided. Usage: ./deploy_services.sh <namespace>"
@@ -37,15 +38,19 @@ do
     continue
   fi
 
-  echo "🔍 Getting latest version tag for $REPO..."
-  LATEST_NUM=$(get_latest_tag "$REPO")
+  
+  if [[ -n "$CUSTOM_TAG" ]]; then
+    export TAG="$CUSTOM_TAG"
+  else
+    echo "🔍 Getting latest version tag for $REPO..."
+    LATEST_NUM=$(get_latest_tag "$REPO")
 
-  if [ -z "$LATEST_NUM" ]; then
-    echo "❌ No version tags found for $REPO. Skipping $yaml"
-    continue
+    if [ -z "$LATEST_NUM" ]; then
+      echo "❌ No version tags found for $REPO. Skipping $yaml"
+      continue
+    fi
+    TAG="v$LATEST_NUM"
   fi
-
-  TAG="v$LATEST_NUM"
   echo "📦 Using tag $TAG for $REPO ($yaml)"
 
   export TAG  # For envsubst
