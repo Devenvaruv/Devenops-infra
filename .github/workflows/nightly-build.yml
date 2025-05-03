@@ -14,7 +14,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_SESSION_TOKEN: ${{secrets.AWS_SESSION_TOKEN}}
       AWS_REGION: us-east-1
-      DATE_TAG: $(date +"%Y%m%d-%H%M%S")
 
     steps:
       - name: Checkout Infra Repo
@@ -48,11 +47,10 @@ jobs:
         run: |
           aws ecr describe-repositories --repository-names "auth-service" || \
           aws ecr create-repository --repository-name "auth-service"
-      
 
       - name: Build and Push Images
         run: |
-          bash scripts/build_push_images.sh $DATE_TAG
+          bash scripts/build_push_images.sh
       
       # - name: Install kubectl
       #   run: |
@@ -81,11 +79,11 @@ jobs:
       
       # - name: Promote Nightly Images to QA
       #   run: |
-      #     bash scripts/promote_batch.sh nightly qa $DATE_TAG
+      #     bash scripts/promote_batch.sh nightly qa
 
       - name: Promote Nightly Images to production
         run: |
-          bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightly $DATE_TAG
+          bash scripts/promote_production.sh $AWS_ACCOUNT_ID nightly
 
       # - name: Cleanup Nightly Namespace
       #   run: |
