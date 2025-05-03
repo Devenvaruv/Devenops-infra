@@ -14,6 +14,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_SESSION_TOKEN: ${{secrets.AWS_SESSION_TOKEN}}
       AWS_REGION: us-east-1
+      DATE_TAG: $(date +"%Y%m%d-%H%M%S")
 
     steps:
       - name: Checkout Infra Repo
@@ -51,8 +52,6 @@ jobs:
 
       - name: Build and Push Images
         run: |
-          DATE_TAG=$(date +"%Y%m%d-%H%M%S")
-          echo "Using DATE_TAG=$DATE_TAG"
           bash scripts/build_push_images.sh $DATE_TAG
       
       # - name: Install kubectl
