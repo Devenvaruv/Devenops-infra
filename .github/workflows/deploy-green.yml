@@ -1,14 +1,10 @@
-name: Blue-Green Deploy to Prod
+name: Deploy to Green
 
 on:
   workflow_dispatch:
-  # workflow_run:
-  #   workflows: ["QA Build"]
-  #   types:
-  #     - completed
 
 jobs:
-  blue-green-deploy:
+  deploy-green:
     runs-on: ubuntu-latest
     env:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -38,31 +34,19 @@ jobs:
           curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-          kubectl version --client
 
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name EKS-Cluster
 
       - name: Create green namespace
-        run: |
-          bash scripts/create_namespace.sh green
+        run: bash scripts/create_namespace.sh green
 
       - name: Deploy all services to green
-        run: |
-          bash scripts/deploy_services_prod.sh green
+        run: bash scripts/deploy_services_prod.sh green
 
       - name: Wait 60 seconds before testing
         run: sleep 60
 
       - name: Test green deployment
-        run: |
-          bash scripts/test_deployment.sh green frontend-service
-
-      - name: Promote green to blue (same tag reused)
-        run: |
-          bash scripts/deploy_services_prod.sh blue
-
-      - name: Cleanup green namespace
-        run: |
-          kubectl delete namespace green
+        run: bash scripts/test_deployment.sh green frontend-service
