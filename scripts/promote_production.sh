@@ -12,10 +12,11 @@ for REPO in "${REPOSITORIES[@]}"; do
   echo "📦 Processing $REPO..."
 
   echo "📄 Fetching existing image tags..."
-  ALL_TAGS=$(aws ecr list-images \
-    --repository-name "$REPO" \
-    --query 'imageDetails[*].imageTags' \
-    --output json | jq -r '.[] | .[]' | sort)
+  ALL_TAGS=$(aws ecr describe-images \
+  --repository-name "$REPO" \
+  --query 'imageDetails[*].imageTags' \
+  --output json | jq -r '.[]? | .[]?' | sort)
+
   
   echo "📌 All tags in $REPO:"
   echo "$ALL_TAGS"
