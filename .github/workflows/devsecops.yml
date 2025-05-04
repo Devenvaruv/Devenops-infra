@@ -16,46 +16,76 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y unzip
+          sudo apt-get install -y unzip wget curl
 
       #############################
       # 🛡️ Trivy - Vulnerability Scan
       #############################
-      - name: Run Trivy FS scan (no fail)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          severity: 'CRITICAL,HIGH'
-          ignore-unfixed: true
-          exit-code: '0' # DO NOT fail even if vulnerabilities found
+      - name: Run Trivy (manual install + full output)
+        run: |
+          mkdir -p trivy-reports
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy fs . \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --exit-code 0 \
+            --format table \
+            --output trivy-reports/trivy-output.txt
+
+          echo "🛡️ Trivy Report:"
+          cat trivy-reports/trivy-output.txt
+        continue-on-error: true
 
       #############################
       # 🔐 Checkov - IaC Security
       #############################
-      - name: Run Checkov (no fail)
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: .
-          framework: all
-          soft_fail: true # DO NOT fail build
+      - name: Run Checkov (with full output)
+        run: |
+          pip install checkov
+          checkov -d . --framework all --soft-fail
+        continue-on-error: true
 
       #############################
       # 🧪 KubeLinter - K8s Linting
       #############################
-      - name: Run KubeLinter (no fail)
-        uses: stackrox/kube-linter-action@v1
-        with:
-          manifests: ./k8s
-          format: compact
-        continue-on-error: true # DO NOT fail build
+      - name: Run KubeLinter (manual install + full output)
+        run: |
+          curl -sSL https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux.tar.gz | tar -xz
+          mkdir -p kube-linter-reports
+          ./kube-linter lint ./k8s > kube-linter-reports/kube-linter-output.txt || true
+
+          echo "🧪 KubeLinter Report:"
+          cat kube-linter-reports/kube-linter-output.txt
+        continue-on-error: true
 
       #############################
       # 📦 OWASP Dependency-Check
       #############################
-      - name: Run OWASP Dependency-Check (no fail)
-        uses: dependency-check/Dependency-Check_Action@main
+      - name: Run OWASP Dependency-Check (manual + HTML output)
+        run: |
+          mkdir -p dependency-check && cd dependency-check
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+          unzip dependency-check-8.4.0-release.zip -d .
+          cd ..
+          mkdir -p reports
+          ./dependency-check/dependency-check/bin/dependency-check.sh \
+            --project "my-app" \
+            --scan . \
+            --format "HTML" \
+            --out ./reports \
+            --disableAssembly
+
+          echo "📦 OWASP report saved to ./reports"
+        continue-on-error: true
+
+      #############################
+      # 📤 Upload All Reports
+      #############################
+      - name: Upload security scan reports
+        uses: actions/upload-artifact@v4
         with:
-          project: 'my-app'
-          format: 'HTML'
-        continue-on-error: true # DO NOT fail build
+          name: security-scan-reports
+          path: |
+            trivy-reports/
+            kube-linter-reports/
+            reports/
