@@ -1,0 +1,61 @@
+name: DevSecOps Security Scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  devsecops-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      #############################
+      # 🛡️ Trivy - Vulnerability Scan
+      #############################
+      - name: Run Trivy FS scan (no fail)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '0' # DO NOT fail even if vulnerabilities found
+
+      #############################
+      # 🔐 Checkov - IaC Security
+      #############################
+      - name: Run Checkov (no fail)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: all
+          soft_fail: true # DO NOT fail build
+
+      #############################
+      # 🧪 KubeLinter - K8s Linting
+      #############################
+      - name: Run KubeLinter (no fail)
+        uses: stackrox/kube-linter-action@v1
+        with:
+          manifests: ./k8s
+          format: compact
+        continue-on-error: true # DO NOT fail build
+
+      #############################
+      # 📦 OWASP Dependency-Check
+      #############################
+      - name: Run OWASP Dependency-Check (no fail)
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'my-app'
+          format: 'HTML'
+        continue-on-error: true # DO NOT fail build
