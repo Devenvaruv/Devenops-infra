@@ -52,6 +52,11 @@ jobs:
         run: |
           aws ecr describe-repositories --repository-names "auth" || \
           aws ecr create-repository --repository-name "auth"
+      
+      - name: Create games repo if not exists
+        run: |
+          aws ecr describe-repositories --repository-names "games" || \
+          aws ecr create-repository --repository-name "games"
 
       - name: Build and Push Images
         run: |
