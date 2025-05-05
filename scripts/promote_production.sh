@@ -44,7 +44,7 @@ for REPO in "${REPOSITORIES[@]}"; do
 
   if [ -z "$MANIFEST" ] || [ "$MANIFEST" == "None" ]; then
     echo "❌ ERROR: Manifest not found for $REPO:$SOURCE_TAG"
-    exit 1
+    continue
   fi
 
   echo "🏷️ Tagging $REPO:$SOURCE_TAG as $VERSION_TAG"
