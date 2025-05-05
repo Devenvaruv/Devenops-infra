@@ -6,7 +6,7 @@ DATE_TAG=$(date +"%Y%m%d")
 OLD_TAG=$1        
 SOURCE_TAG="$OLD_TAG-$DATE_TAG"      
 REGION="us-east-1"
-REPOSITORIES=("frontend" "auth")
+REPOSITORIES=("frontend" "auth" "games")
 
 for REPO in "${REPOSITORIES[@]}"; do
   echo "📦 Processing $REPO..."

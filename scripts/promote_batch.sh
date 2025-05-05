@@ -6,7 +6,7 @@ NEW_TAG=$2
 #DATE_TAG=20250504
 DATE_TAG=$(date +"%Y%m%d")
 
-SERVICES=("frontend" "auth")
+SERVICES=("frontend" "auth" "games")
 
 echo "🚀 Promoting nightly images to QA via AWS API for date $DATE_TAG..."
 

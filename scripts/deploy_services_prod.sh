@@ -33,6 +33,8 @@ do
     REPO="frontend"
   elif [[ $yaml == *auth* ]]; then
     REPO="auth"
+  elif [[ $yaml == *games*]]; then
+    REPO="games"
   else
     echo "⚠️ Skipping unknown file: $yaml"
     continue

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: games
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: games
+  template:
+    metadata:
+      labels:
+        app: games
+    spec:
+      containers:
+        - name: games
+          image: 179235553979.dkr.ecr.us-east-1.amazonaws.com/games:${TAG}
+          ports:
+            - containerPort: 4000
