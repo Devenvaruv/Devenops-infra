@@ -3,7 +3,7 @@ name: QA Build
 on:
   workflow_dispatch:  # manual trigger
   workflow_run:
-    workflows: ["sNightly Build"]
+    workflows: ["Nightly Build"]
     types:
       - completed
 
@@ -54,17 +54,13 @@ jobs:
         run: |
           bash scripts/deploy_services.sh qa
 
-      # - name: Test Deployment to QA
-      #   run: |
-      #     bash scripts/test_deployment.sh qa frontend-service
-      
-      # - name: Promote QA Images to Latest
-      #   run: |
-      #     bash scripts/promote_batch.sh qa blue
-      
-      - name: Promote Nightly Images to production
+      - name: Test Deployment to QA
         run: |
-          bash scripts/promote_production.sh qa
+          bash scripts/test_deployment.sh qa frontend-service
+      
+      - name: Promote QA Images to UAT
+        run: |
+          bash scripts/promote_batch.sh qa uat
 
       - name: Cleanup qa Namespace
         run: |

@@ -83,18 +83,14 @@ jobs:
         run: |
           bash scripts/deploy_services.sh nightly
 
-      # - name: Test Deployment
-      #   run: |
-      #     bash scripts/test_deployment.sh nightly frontend-service
+      - name: Test Deployment
+        run: |
+          bash scripts/test_deployment.sh nightly frontend-service
       
-      # - name: Promote Nightly Images to QA
-      #   run: |
-      #     bash scripts/promote_batch.sh nightly qa
+      - name: Promote Nightly Images to QA
+        run: |
+          bash scripts/promote_batch.sh nightly qa
 
-      # - name: Promote Nightly Images to production
-      #   run: |
-      #     bash scripts/promote_production.sh nightly
-
-      # - name: Cleanup Nightly Namespace
-      #   run: |
-      #     bash scripts/clean_up.sh nightly
+      - name: Cleanup Nightly Namespace
+        run: |
+          bash scripts/clean_up.sh nightly
